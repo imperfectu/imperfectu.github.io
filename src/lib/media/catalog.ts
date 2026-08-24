@@ -1,6 +1,6 @@
 import { getSupabase } from '$lib/supabaseClient';
 import type { Tables } from '$lib/database.types';
-import type { InteractiveChoice, MediaItem, TransmediaItem } from '$lib/types';
+import type { ContentRowData, InteractiveChoice, MediaItem, TransmediaItem } from '$lib/types';
 
 type MediaRow = Tables<'media_items'> & { has_transmedia?: boolean | null };
 type TransmediaRow = Tables<'transmedia_items'>;
@@ -115,5 +115,51 @@ export async function fetchChaptersForMedia(
 	return (data as ChapterRow[]).map((c) => ({
 		time: Number(c.time_seconds),
 		label: c.label
+	}));
+}
+
+export async function fetchFeaturedMedia(): Promise<MediaItem | null> {
+	const items = await fetchPublishedMedia();
+	if (!items?.length) return null;
+	return items.find((m) => m.featured) ?? items[0];
+}
+
+export async function fetchHomeRows(): Promise<ContentRowData[] | null> {
+	const supabase = getSupabase();
+	if (!supabase) return null;
+
+	const { data: rows, error: rowsError } = await supabase
+		.from('content_rows')
+		.select('id, title, sort_order')
+		.eq('published', true)
+		.order('sort_order', { ascending: true });
+
+	if (rowsError || !rows?.length) {
+		console.warn('[supabase] fetchHomeRows rows', rowsError?.message);
+		return null;
+	}
+
+	const { data: rowItems, error: itemsError } = await supabase
+		.from('content_row_items')
+		.select('row_id, media_id, sort_order')
+		.order('sort_order', { ascending: true });
+
+	if (itemsError) {
+		console.warn('[supabase] fetchHomeRows items', itemsError.message);
+		return null;
+	}
+
+	const allMedia = await fetchPublishedMedia();
+	if (!allMedia) return null;
+
+	const mediaById = new Map(allMedia.map((m) => [m.id, m]));
+
+	return rows.map((row) => ({
+		id: row.id,
+		title: row.title,
+		items: (rowItems ?? [])
+			.filter((item) => item.row_id === row.id)
+			.map((item) => mediaById.get(item.media_id))
+			.filter((m): m is MediaItem => Boolean(m))
 	}));
 }

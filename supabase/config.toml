@@ -1,7 +1,7 @@
 # Imperfectu Supabase project config (optional — use with Supabase CLI)
 
 [project]
-id = "imperfectu"
+id = "byilutuduynxkmvcjmkm"
 
 [api]
 enabled = true

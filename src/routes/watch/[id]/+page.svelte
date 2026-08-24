@@ -4,11 +4,45 @@
 	import VideoPlayer from '$lib/components/VideoPlayer.svelte';
 	import TransmediaHub from '$lib/components/TransmediaHub.svelte';
 	import { getMediaById, getTransmediaForMedia } from '$lib/data/mockMedia';
-	import type { HubTab } from '$lib/types';
+	import {
+		loadChaptersForMedia,
+		loadMediaById,
+		loadTransmediaForMedia
+	} from '$lib/media/resolver';
+	import type { HubTab, MediaItem, TransmediaItem } from '$lib/types';
 
 	const id = $derived(page.params.id ?? '');
-	const media = $derived(getMediaById(id));
-	const transmedia = $derived(media ? getTransmediaForMedia(media.id) : []);
+
+	let media = $state<MediaItem | undefined>();
+	let transmedia = $state<TransmediaItem[]>([]);
+	let chapters = $state<{ time: number; label: string }[]>([]);
+	let loading = $state(true);
+
+	$effect(() => {
+		const mediaId = id;
+		if (!mediaId) {
+			media = undefined;
+			transmedia = [];
+			chapters = [];
+			loading = false;
+			return;
+		}
+
+		loading = true;
+		media = getMediaById(mediaId);
+		transmedia = media ? getTransmediaForMedia(media.id) : [];
+
+		void Promise.all([
+			loadMediaById(mediaId),
+			loadTransmediaForMedia(mediaId),
+			loadChaptersForMedia(mediaId)
+		]).then(([m, t, c]) => {
+			media = m;
+			transmedia = t;
+			chapters = c;
+			loading = false;
+		});
+	});
 
 	const hubParam = $derived(page.url.searchParams.get('hub'));
 	const initialTab = $derived<HubTab>(
@@ -16,19 +50,15 @@
 			? hubParam
 			: 'narrative'
 	);
-
-	const chapters = [
-		{ time: 0, label: 'Cold open' },
-		{ time: 90, label: 'Act I' },
-		{ time: 300, label: 'Midpoint' }
-	];
 </script>
 
 <svelte:head>
 	<title>{media ? `${media.title} — Imperfectu` : 'Not found — Imperfectu'}</title>
 </svelte:head>
 
-{#if !media}
+{#if loading}
+	<div class="flex min-h-[70vh] items-center justify-center pt-24 text-sm text-zinc-500">Loading…</div>
+{:else if !media}
 	<div class="flex min-h-[70vh] flex-col items-center justify-center px-4 pt-24 text-center">
 		<p class="font-display text-3xl text-white">Title not found</p>
 		<a href="{base}/" class="mt-4 text-sm text-[#e50914] hover:underline">Back to home</a>

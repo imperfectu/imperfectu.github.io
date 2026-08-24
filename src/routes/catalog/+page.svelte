@@ -1,8 +1,10 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { page } from '$app/state';
 	import MediaCard from '$lib/components/MediaCard.svelte';
 	import { mockMedia } from '$lib/data/mockMedia';
-	import type { MediaGenre } from '$lib/types';
+	import { loadCatalog } from '$lib/media/resolver';
+	import type { MediaGenre, MediaItem } from '$lib/types';
 
 	const genres: Array<MediaGenre | 'All'> = [
 		'All',
@@ -17,8 +19,15 @@
 		'Animation'
 	];
 
+	let catalog = $state<MediaItem[]>(mockMedia);
 	let genre = $state<MediaGenre | 'All'>('All');
 	let transmediaOnly = $state(false);
+
+	onMount(() => {
+		void loadCatalog().then((items) => {
+			catalog = items;
+		});
+	});
 
 	$effect(() => {
 		const type = page.url.searchParams.get('type');
@@ -26,7 +35,7 @@
 	});
 
 	const filtered = $derived(
-		mockMedia.filter((m) => {
+		catalog.filter((m) => {
 			const genreOk = genre === 'All' || m.genres.includes(genre);
 			const tmOk = !transmediaOnly || m.has_transmedia;
 			return genreOk && tmOk;
