@@ -6,5 +6,9 @@
 	"assets": {
 		"binding": "ASSETS",
 		"directory": ".svelte-kit/cloudflare"
+	},
+	// Runs automatically before `wrangler deploy` / `wrangler dev`
+	"build": {
+		"command": "npm run build:vite"
 	}
 }
