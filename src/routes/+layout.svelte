@@ -1,7 +1,9 @@
 <script lang="ts">
 	import './layout.css';
+	import { base } from '$app/paths';
 	import favicon from '$lib/assets/favicon.svg';
 	import Navbar from '$lib/components/Navbar.svelte';
+	import { brand, socialLinks } from '$lib/content/about';
 
 	let { children } = $props();
 	let scrolled = $state(false);
@@ -36,8 +38,31 @@
 	<main>
 		{@render children()}
 	</main>
-	<footer class="mt-16 border-t border-white/5 px-4 py-10 text-center text-xs text-zinc-600 sm:px-8">
-		<p class="font-display text-lg tracking-wide text-zinc-500">Imperfectu</p>
-		<p class="mt-2">Transmedia experiences · Staging on GitHub Pages</p>
+	<footer class="mt-16 border-t border-white/5 px-4 py-10 sm:px-8">
+		<div class="mx-auto flex max-w-[1200px] flex-col items-center gap-6 text-center">
+			<a href="{base}/">
+				<img
+					src="{base}{brand.logo}"
+					alt={brand.logoAlt}
+					class="mx-auto h-8 w-auto opacity-80 transition hover:opacity-100"
+					width="157"
+					height="36"
+				/>
+			</a>
+			<nav class="flex flex-wrap justify-center gap-4 text-xs text-zinc-500">
+				{#each socialLinks as link}
+					<a
+						href={link.href}
+						class="transition hover:text-zinc-300"
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						{link.label}
+					</a>
+				{/each}
+				<a href="{base}/about" class="transition hover:text-zinc-300">About</a>
+			</nav>
+			<p class="text-xs text-zinc-600">© {new Date().getFullYear()} Imperfectu. All rights reserved.</p>
+		</div>
 	</footer>
 </div>

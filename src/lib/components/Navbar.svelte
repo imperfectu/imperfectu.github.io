@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { base } from '$app/paths';
 	import { Search, Bell, ChevronDown } from '@lucide/svelte';
+	import { brand } from '$lib/content/about';
 
 	let { scrolled = false }: { scrolled?: boolean } = $props();
 
@@ -15,9 +16,15 @@
 		: 'bg-gradient-to-b from-black/80 via-black/40 to-transparent'}"
 >
 	<nav class="mx-auto flex h-16 max-w-[1800px] items-center gap-6 px-4 sm:px-8 lg:px-12">
-		<a href="{base}/" class="group shrink-0 font-display text-2xl tracking-tight text-[#e50914] sm:text-3xl">
-			Imperfectu
-			<span class="sr-only">Home</span>
+		<a href="{base}/" class="group shrink-0">
+			<img
+				src="{base}{brand.logo}"
+				alt={brand.logoAlt}
+				class="h-8 w-auto transition group-hover:opacity-90 sm:h-9"
+				width="157"
+				height="36"
+			/>
+			<span class="sr-only">Imperfectu Home</span>
 		</a>
 
 		<ul class="hidden items-center gap-5 text-sm text-zinc-300 md:flex">
@@ -29,6 +36,9 @@
 			</li>
 			<li>
 				<a href="{base}/catalog?type=transmedia" class="transition hover:text-white">Experiences</a>
+			</li>
+			<li>
+				<a href="{base}/about" class="transition hover:text-white">About</a>
 			</li>
 		</ul>
 
