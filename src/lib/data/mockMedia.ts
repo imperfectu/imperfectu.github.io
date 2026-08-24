@@ -13,7 +13,8 @@ export const mockMedia: MediaItem[] = [
 		thumbnail_url: img('echoes-glass', 640, 360),
 		backdrop_url: img('echoes-glass-bg', 1920, 1080),
 		trailer_url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
-		main_video_url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+		/** Public Mux HLS demo stream — swap for your CDN master playlist */
+		main_video_url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
 		release_year: 2025,
 		maturity_rating: 'TV-MA',
 		duration_minutes: 48,

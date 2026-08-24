@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Maximize, Minimize, Pause, Play } from '@lucide/svelte';
+	import { attachMediaSource, isHlsUrl, type MediaAttachHandle } from '$lib/media/hls';
 
 	let {
 		src,
@@ -20,6 +21,27 @@
 	let rate = $state(1);
 	let isFullscreen = $state(false);
 	let container: HTMLDivElement | undefined = $state();
+	let errorMessage = $state<string | null>(null);
+	let attachHandle: MediaAttachHandle | null = null;
+
+	$effect(() => {
+		const el = video;
+		const url = src;
+		if (!el || !url) return;
+
+		errorMessage = null;
+		attachHandle?.destroy();
+		attachHandle = attachMediaSource(el, url, {
+			onFatalError: (message) => {
+				errorMessage = message;
+			}
+		});
+
+		return () => {
+			attachHandle?.destroy();
+			attachHandle = null;
+		};
+	});
 
 	function togglePlay() {
 		if (!video) return;
@@ -74,6 +96,8 @@
 			.padStart(2, '0');
 		return `${m}:${sec}`;
 	}
+
+	const streamingLabel = $derived(isHlsUrl(src) ? 'HLS' : 'MP4');
 </script>
 
 <div
@@ -83,7 +107,6 @@
 	<video
 		bind:this={video}
 		class="aspect-video w-full bg-black"
-		{src}
 		{poster}
 		playsinline
 		preload="metadata"
@@ -96,10 +119,21 @@
 		<track kind="captions" />
 	</video>
 
+	{#if errorMessage}
+		<div class="absolute inset-0 flex items-center justify-center bg-black/80 px-6 text-center">
+			<p class="text-sm text-red-300">{errorMessage}</p>
+		</div>
+	{/if}
+
 	<div
 		class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/70 to-transparent px-3 pt-16 pb-3 opacity-100 transition sm:px-4 sm:opacity-0 sm:group-hover:opacity-100"
 	>
-		<p class="mb-2 truncate text-xs text-zinc-400 sm:text-sm">{title}</p>
+		<div class="mb-2 flex items-center gap-2">
+			<p class="truncate text-xs text-zinc-400 sm:text-sm">{title}</p>
+			<span class="shrink-0 rounded bg-white/10 px-1.5 py-0.5 text-[10px] tracking-wide text-zinc-400 uppercase">
+				{streamingLabel}
+			</span>
+		</div>
 
 		<input
 			type="range"

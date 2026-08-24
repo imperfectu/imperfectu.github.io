@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { base } from '$app/paths';
 	import { Info, Play, Layers } from '@lucide/svelte';
+	import { attachMediaSource, type MediaAttachHandle } from '$lib/media/hls';
 	import type { MediaItem } from '$lib/types';
 
 	let {
@@ -13,13 +14,27 @@
 
 	let videoEl: HTMLVideoElement | undefined = $state();
 	let muted = $state(true);
+	let attachHandle: MediaAttachHandle | null = null;
 
 	$effect(() => {
-		if (!autoplayPreview || !videoEl) return;
-		videoEl.muted = true;
-		void videoEl.play().catch(() => {
-			/* autoplay may be blocked — still image backdrop remains */
+		const el = videoEl;
+		const url = item.trailer_url;
+		if (!el || !url) return;
+
+		attachHandle?.destroy();
+		attachHandle = attachMediaSource(el, url, {
+			autoplay: autoplayPreview,
+			muted: true
 		});
+
+		return () => {
+			attachHandle?.destroy();
+			attachHandle = null;
+		};
+	});
+
+	$effect(() => {
+		if (videoEl) videoEl.muted = muted;
 	});
 </script>
 
@@ -29,7 +44,6 @@
 		<video
 			bind:this={videoEl}
 			class="absolute inset-0 h-full w-full object-cover"
-			src={item.trailer_url}
 			poster={item.backdrop_url ?? item.thumbnail_url}
 			loop
 			muted={muted}
@@ -106,7 +120,6 @@
 				class="ml-1 rounded-full border border-white/30 px-3 py-2 text-xs text-zinc-300 transition hover:border-white hover:text-white"
 				onclick={() => {
 					muted = !muted;
-					if (videoEl) videoEl.muted = muted;
 				}}
 			>
 				{muted ? 'Unmute' : 'Mute'}

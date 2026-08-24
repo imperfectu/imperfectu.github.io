@@ -1,0 +1,14 @@
+# Imperfectu Supabase project config (optional — use with Supabase CLI)
+
+[project]
+id = "imperfectu"
+
+[api]
+enabled = true
+
+[db]
+major_version = 15
+
+[db.seed]
+enabled = true
+sql_paths = ["./seed.sql"]
