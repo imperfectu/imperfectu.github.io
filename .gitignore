@@ -8,6 +8,9 @@ node_modules
 /.svelte-kit
 /build
 
+# Keep Cloudflare Env typings committed for CI (do not ignore)
+!worker-configuration.d.ts
+
 # OS
 .DS_Store
 Thumbs.db
