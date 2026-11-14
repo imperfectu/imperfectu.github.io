@@ -16,7 +16,7 @@
 		"build:cloudflare": "wrangler types && DEPLOY_TARGET=cloudflare vite build"
 	},
 	"devDependencies": {
-		"@sveltejs/adapter-cloudflare": "^7.2.9",
+		"@sveltejs/adapter-cloudflare": "^7.2.10",
 		"@sveltejs/adapter-static": "^3.0.10",
 		"@sveltejs/kit": "^2.63.0",
 		"@sveltejs/vite-plugin-svelte": "^7.1.2",
